@@ -1,56 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { withAuthenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import Home from './Home';
-import { fetchAuthSession  } from 'aws-amplify/auth';
-import { Hub } from 'aws-amplify/utils';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import darkTheme from './styles/theme';
+import { ThemeProvider, CssBaseline } from '@mui/material';
 
-function App({ signOut, user }) {
-  const [authUser, setAuthUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const session = await fetchAuthSession();
-        if (!session) {
-          throw new Error('No credentials in session');
-        }
-        setAuthUser(session);
-      } catch (error) {
-        setAuthUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const handleAuthEvents = (event) => {
-      if (event.payload.event === 'signIn') {
-        checkUser();
-      } else if (event.payload.event === 'signOut') {
-        setAuthUser(null);
-      }
-    };
-
-    const listener = Hub.listen('auth', handleAuthEvents);
-    checkUser();
-
-    return () => {
-      listener();
-    };
-  }, []);
-
+function App({ signOut }) {
+  const { authUser, loading } = useAuth();
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <Routes>
-      <Route path="/home" element={authUser ? <Home signOut={signOut} /> : <Navigate to="/" />} />
-      <Route path="/" element={authUser ? <Navigate to="/home" /> : <Navigate to="/login" />} />
-    </Routes>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <Routes>
+        <Route path="/home" element={authUser ? <Home signOut={signOut} /> : <Navigate to="/" />} />
+        <Route path="/" element={authUser ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+      </Routes>
+    </ThemeProvider>
   );
 }
 
@@ -76,6 +48,11 @@ const formFields = {
   },
 };
 
-const AppWithAuth = withAuthenticator(App, { formFields });
+const AppWithAuth = withAuthenticator((props) => (
+  <AuthProvider>
+    <App {...props} />
+  </AuthProvider>
+), { formFields });
 
 export default AppWithAuth;
+

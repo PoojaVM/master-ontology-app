@@ -1,23 +1,13 @@
 import React from 'react';
-import { signOut } from 'aws-amplify/auth';
-import { useNavigate } from 'react-router-dom';
+import Grid from './common/Grid';
+import Header from './common/Header';
 
 function Home() {
-  const navigate = useNavigate();
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate('/');
-    } catch (error) {
-      console.error('Error signing out', error);
-    }
-  };
 
   return (
     <div>
-      <h1>Welcome to the Home Page</h1>
-      <button onClick={handleSignOut}>Sign Out</button>
+      <Header />
+      <Grid />
     </div>
   );
 }
