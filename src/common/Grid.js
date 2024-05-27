@@ -7,6 +7,9 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Box,
+  Typography,
+  Button,
 } from "@mui/material";
 import MoreMenu from "./MoreMenu";
 import ConceptFormDialog from "./ConceptFormDialog";
@@ -56,31 +59,40 @@ const data = [
 ];
 
 const Grid = () => {
-  const [conceptToBeEdited, setConceptToBeEdited] = React.useState();
+  const [selectedConcept, setSelectedConcept] = React.useState();
   const onDeleteConcept = (id) => {
     // Add logic to delete concept from the database
     console.log(`Deleting concept with ID: ${id}`);
   };
 
-  // const onEditConcept = (concept) => {
-  //   // Add logic to edit concept
-  //   console.log(`Editing concept with ID: ${concept.id}`);
-  // };
-
   const onEditConceptClick = (concept) => {
-    setConceptToBeEdited(concept);
+    setSelectedConcept(concept);
+  };
+
+  const onFormClose = (saved = false) => {
+    if (saved) {
+      // Add logic to fetch concepts from the database again
+      console.log("Fetching concepts from the database");
+    }
+    setSelectedConcept();
   };
 
   return (
     <div>
-      {conceptToBeEdited && (
+      {selectedConcept && (
         <ConceptFormDialog
-          open={!!conceptToBeEdited}
-          handleClose={() => setConceptToBeEdited()}
-          concept={conceptToBeEdited}
+          open={!!selectedConcept}
+          handleClose={onFormClose}
+          concept={selectedConcept}
           concepts={data}
         />
       )}
+      <Box display="flex" justifyContent="space-between" mb={2}>
+        <Typography variant="h4">Concepts</Typography>
+        <Button variant="contained" onClick={() => setSelectedConcept({})}>
+          + Create Concept
+        </Button>
+      </Box>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -106,7 +118,9 @@ const Grid = () => {
                 </TableCell>
                 <TableCell align="right">{row.display_name}</TableCell>
                 <TableCell align="right">{row.description}</TableCell>
-                <TableCell align="right">{row.parent_ids?.join(", ")}</TableCell>
+                <TableCell align="right">
+                  {row.parent_ids?.join(", ")}
+                </TableCell>
                 <TableCell align="right">{row.child_ids?.join(", ")}</TableCell>
                 <TableCell align="right">
                   {row?.alternate_names?.join(", ")}

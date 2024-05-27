@@ -22,12 +22,16 @@ export default function MoreMenu({ handleEdit, handleDelete }) {
     setAnchorEl(null);
   };
 
-  const onEditClick = () => {
+  const onEditClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     handleEdit();
     handleClose();
   };
 
-  const onDeleteClick = () => {
+  const onDeleteClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     setOpenAlertDialog(true);
     handleClose();
   };

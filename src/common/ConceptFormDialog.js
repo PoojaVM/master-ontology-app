@@ -6,8 +6,10 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Autocomplete from "@mui/material/Autocomplete";
+import { Alert, AlertTitle, Box, Collapse } from "@mui/material";
 import Loading from "./Loading";
-import { Alert, AlertTitle, Collapse } from "@mui/material";
+import { useSnackbar } from "../contexts/SnackbarContext";
+import LinearProgressWithLabel from "./LinearProgressWithLabel";
 
 const filterConcepts = (concepts, conceptIds) => {
   return (
@@ -23,6 +25,7 @@ export default function ConceptFormDialog({
   concept,
   concepts: conceptList = [],
 }) {
+  const showSnackbar = useSnackbar();
   const concepts = React.useMemo(() => {
     return conceptList.filter((c) => c.id !== concept?.id);
   }, [conceptList, concept]);
@@ -46,11 +49,23 @@ export default function ConceptFormDialog({
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
 
+  const progress = React.useMemo(() => {
+    const added = [
+      !!displayName,
+      !!description,
+      !!parents?.length,
+      !!childs?.length,
+      !!alternateNames,
+    ].filter((value) => value).length;
+
+    return Math.round((added / 5) * 100);
+  }, [displayName, description, parents, childs, alternateNames]);
+
   const onSubmit = (event) => {
     try {
       event.preventDefault();
-      const parent_ids = parents.map((parent) => parent.id).join(", ");
-      const child_ids = childs.map((child) => child.id).join(", ");
+      const parent_ids = parents.map((parent) => parent.id);
+      const child_ids = childs.map((child) => child.id);
       const alternate_names = alternateNames
         .split(",")
         .map((name) => name.trim())
@@ -65,9 +80,45 @@ export default function ConceptFormDialog({
         alternate_names,
       };
 
-      setError("Nothing configured yet");
+      if (!conceptPayload.display_name) {
+        throw new Error("Display Name is required");
+      }
 
-      // setLoading(true);
+      if (!conceptPayload.description) {
+        throw new Error("Description is required");
+      }
+
+      if (conceptPayload.parent_ids?.length) {
+        if (conceptPayload.parent_ids.some((id) => conceptPayload.id === id)) {
+          throw new Error("Concept cannot be parent of itself");
+        }
+
+        if (
+          conceptPayload.child_ids?.length &&
+          conceptPayload.parent_ids.some((id) =>
+            conceptPayload.child_ids.includes(id)
+          )
+        ) {
+          throw new Error("Concept cannot be parent and child of each other");
+        }
+      }
+
+      if (conceptPayload.child_ids?.length) {
+        if (conceptPayload.child_ids.some((id) => conceptPayload.id === id)) {
+          throw new Error("Concept cannot be child of itself");
+        }
+
+        if (
+          conceptPayload.parent_ids?.length &&
+          conceptPayload.child_ids.some((id) =>
+            conceptPayload.parent_ids.includes(id)
+          )
+        ) {
+          throw new Error("Concept cannot be parent and child of each other");
+        }
+      }
+
+      setLoading(true);
 
       if (concept?.id) {
         // Update
@@ -76,6 +127,10 @@ export default function ConceptFormDialog({
         // Create
         console.log("Create Concept", conceptPayload);
       }
+
+      showSnackbar("Concept saved successfully", "success");
+      setLoading(false);
+      handleClose(true);
     } catch (error) {
       console.error("Error submitting concept form", error);
       setLoading(false);
@@ -90,6 +145,7 @@ export default function ConceptFormDialog({
       fullWidth
       PaperProps={{
         component: "form",
+        noValidate: true,
         onSubmit,
       }}
     >
@@ -98,6 +154,9 @@ export default function ConceptFormDialog({
         {concept?.id ? `Edit Concept - ${displayName}` : "Create Concept"}
       </DialogTitle>
       <DialogContent>
+        <Box sx={{ width: "100%" }}>
+          <LinearProgressWithLabel value={progress} />
+        </Box>
         <TextField
           required
           margin="dense"
@@ -157,6 +216,7 @@ export default function ConceptFormDialog({
               placeholder="Add Parents"
             />
           )}
+          style={{ marginTop: "8px", marginBottom: "8px" }}
         />
         <Autocomplete
           multiple
@@ -181,6 +241,7 @@ export default function ConceptFormDialog({
               placeholder="Add Children"
             />
           )}
+          style={{ marginTop: "8px", marginBottom: "4px" }}
         />
         <TextField
           margin="dense"
@@ -205,7 +266,7 @@ export default function ConceptFormDialog({
             }
           }}
         />
-        <Collapse in={error}>
+        <Collapse in={!!error}>
           <Alert severity="error" onClose={() => setError()}>
             <AlertTitle>Error</AlertTitle>
             {error}
