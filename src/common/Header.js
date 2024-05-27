@@ -6,9 +6,11 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { Avatar, Box } from "@mui/material";
+import { useSnackbar } from "../contexts/SnackbarContext";
 
 const Header = () => {
   const { authUser, logOut } = useAuth();
+  const showSnackbar = useSnackbar();
   const navigate = useNavigate();
 
   const username = React.useMemo(() => {
@@ -18,6 +20,7 @@ const Header = () => {
   const handleSignOut = async () => {
     try {
       await logOut();
+      showSnackbar("You have been signed out", "success");
       navigate("/");
     } catch (error) {
       console.error("Error signing out", error);
@@ -34,7 +37,12 @@ const Header = () => {
           <Avatar sx={{ width: 32, height: 32 }}>
             {username?.[0]?.toUpperCase()}
           </Avatar>
-          <Typography variant="h6" component="div" marginLeft={1} marginRight={1}>
+          <Typography
+            variant="h6"
+            component="div"
+            marginLeft={1}
+            marginRight={1}
+          >
             Welcome, {username}
           </Typography>
 
