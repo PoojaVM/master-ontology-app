@@ -10,8 +10,6 @@ export const SnackbarProvider = ({ children }) => {
 
   const handleClose = () => {
     setOpen(false);
-    setSeverity("");
-    setMessage("");
   };
 
   const showSnackbar = React.useCallback((message, severity = "success") => {
@@ -19,6 +17,12 @@ export const SnackbarProvider = ({ children }) => {
     setSeverity(severity);
     setOpen(true);
   }, []);
+
+  React.useEffect(() => {
+    if (!open) {
+      setMessage("");
+    }
+  }, [open]);
 
   return (
     <SnackbarContext.Provider value={showSnackbar}>

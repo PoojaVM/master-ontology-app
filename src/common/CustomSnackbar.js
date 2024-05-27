@@ -33,8 +33,13 @@ export default function CustomSnackbar({
 }
 
 CustomSnackbar.propTypes = {
-  open: PropTypes.bool.isRequired,
+  open: PropTypes.bool,
   handleClose: PropTypes.func.isRequired,
   severity: PropTypes.oneOf(["error", "info", "success", "warning"]).isRequired,
-  children: PropTypes.any.isRequired,
+  children: PropTypes.any,
+};
+
+CustomSnackbar.defaultProps = {
+  open: false,
+  children: "",
 };

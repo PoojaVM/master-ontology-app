@@ -62,15 +62,10 @@ const Grid = () => {
     setSelectedConcept(concept);
   };
 
-  const onFormClose = (saved = false) => {
-    if (saved) {
-      // Add logic to fetch concepts from the database again
-      console.log("Fetching concepts from the database");
-    }
+  const onFormClose = async () => {
+    await fetchConcepts();
     setSelectedConcept();
   };
-
-
 
   return (
     <div>
@@ -80,9 +75,11 @@ const Grid = () => {
       {selectedConcept && (
         <ConceptFormDialog
           open={!!selectedConcept}
-          handleClose={onFormClose}
+          afterSuccess={onFormClose}
+          handleClose={() => setSelectedConcept()}
           concept={selectedConcept}
           concepts={concepts}
+          canEdit={canEdit}
         />
       )}
       <Box display="flex" justifyContent="space-between" mb={2}>

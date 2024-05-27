@@ -10,6 +10,7 @@ import { Alert, AlertTitle, Box, Collapse } from "@mui/material";
 import Loading from "./Loading";
 import { useSnackbar } from "../contexts/SnackbarContext";
 import LinearProgressWithLabel from "./LinearProgressWithLabel";
+import apiService from "../api/concepts";
 
 const filterConcepts = (concepts, conceptIds) => {
   return (
@@ -21,6 +22,8 @@ const filterConcepts = (concepts, conceptIds) => {
 
 export default function ConceptFormDialog({
   open,
+  canEdit,
+  afterSuccess,
   handleClose,
   concept,
   concepts: conceptList = [],
@@ -61,7 +64,7 @@ export default function ConceptFormDialog({
     return Math.round((added / 5) * 100);
   }, [displayName, description, parents, childs, alternateNames]);
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     try {
       event.preventDefault();
       const parent_ids = parents.map((parent) => parent.id);
@@ -119,22 +122,19 @@ export default function ConceptFormDialog({
       }
 
       setLoading(true);
-
       if (concept?.id) {
-        // Update
-        console.log("Update Concept", conceptPayload);
+        await apiService.updateConcept(conceptPayload);
       } else {
-        // Create
-        console.log("Create Concept", conceptPayload);
+        await apiService.addConcept(conceptPayload);
       }
 
-      showSnackbar("Concept saved successfully", "success");
+      await afterSuccess();
+      showSnackbar(`Concept "${conceptPayload.display_name}" ${concept.id ? 'updated' : 'added'}  successfully`, "success");
       setLoading(false);
-      handleClose(true);
     } catch (error) {
       console.error("Error submitting concept form", error);
       setLoading(false);
-      setError(error.message);
+      setError(error?.response?.data?.message || error?.message);
     }
   };
 
@@ -151,13 +151,18 @@ export default function ConceptFormDialog({
     >
       {loading ? <Loading /> : null}
       <DialogTitle>
-        {concept?.id ? `Edit Concept - ${displayName}` : "Create Concept"}
+        {concept?.id ? `${canEdit ? 'Edit' : 'View'} Concept - ${displayName}` : "Create Concept"}
       </DialogTitle>
       <DialogContent>
-        <Box sx={{ width: "100%" }}>
-          <LinearProgressWithLabel value={progress} />
-        </Box>
+        {
+          canEdit ? (
+            <Box sx={{ width: "100%" }}>
+              <LinearProgressWithLabel value={progress} />
+            </Box>
+          ) : null
+        }
         <TextField
+          InputProps={{ readOnly: !canEdit }}
           required
           margin="dense"
           id="displayName"
@@ -175,6 +180,7 @@ export default function ConceptFormDialog({
           }}
         />
         <TextField
+          InputProps={{ readOnly: !canEdit }}
           required
           margin="dense"
           id="description"
@@ -194,6 +200,7 @@ export default function ConceptFormDialog({
           }}
         />
         <Autocomplete
+          readOnly={!canEdit}
           multiple
           id="parent-tags"
           options={concepts}
@@ -212,13 +219,14 @@ export default function ConceptFormDialog({
             <TextField
               {...params}
               variant="standard"
-              label="Parents"
+              label="Parent Concepts"
               placeholder="Add Parents"
             />
           )}
           style={{ marginTop: "8px", marginBottom: "8px" }}
         />
         <Autocomplete
+          readOnly={!canEdit}
           multiple
           id="childs-tags"
           options={concepts}
@@ -244,6 +252,7 @@ export default function ConceptFormDialog({
           style={{ marginTop: "8px", marginBottom: "4px" }}
         />
         <TextField
+          InputProps={{ readOnly: !canEdit }}
           margin="dense"
           id="alternateNames"
           name="alternateNames"
@@ -275,7 +284,13 @@ export default function ConceptFormDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button type="submit">{concept?.id ? "Save" : "Create"}</Button>
+        {
+          canEdit ? (
+            <Button type="submit" variant="contained" color="primary">
+              {concept?.id ? "Update" : "Add"}
+            </Button>
+          ) : null
+        }
       </DialogActions>
     </Dialog>
   );

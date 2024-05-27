@@ -30,6 +30,16 @@ const apiService = {
       throw error;
     }
   },
+
+  async addConcept(concept) {
+    try {
+      const response = await axiosInstance.post('/concepts', concept);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding concept:', error);
+      throw error;
+    }
+  }
 };
 
 export default apiService;
