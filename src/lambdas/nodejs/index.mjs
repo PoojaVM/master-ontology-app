@@ -74,13 +74,13 @@ export async function handler(event) {
   if (method === 'GET') {
     return await getConcepts();
   } else if (method === 'POST' || method === 'PUT' || method === 'DELETE') {
-    if (groups.includes('admin') || groups.includes('edit')) {
+    if (groups.includes('Admin') || groups.includes('Edit')) {
       if (method === 'POST') {
         return await addConcept(body);
       } else if (method === 'PUT') {
         return await updateConcept(body);
       } else if (method === 'DELETE') {
-        return await deleteConcept(body.id);
+        return await deleteConcept(event.pathParameters.id);
       }
     } else {
       return {

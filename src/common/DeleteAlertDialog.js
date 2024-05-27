@@ -6,10 +6,23 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
 export default function DeleteAlertDialog({ open, handleClose, handleDelete }) {
+  const onClose = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleClose();
+  };
+
+  const onDelete = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleDelete();
+    handleClose();
+  };
+
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={onClose}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
     >
@@ -21,8 +34,8 @@ export default function DeleteAlertDialog({ open, handleClose, handleDelete }) {
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
-        <Button onClick={handleDelete} autoFocus>
+        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onDelete} autoFocus>
           Yes, Delete
         </Button>
       </DialogActions>

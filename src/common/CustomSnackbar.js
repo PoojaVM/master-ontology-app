@@ -10,7 +10,7 @@ export default function CustomSnackbar({
   severity,
   children,
 }) {
-  const onClose = (event, reason) => {
+  const onClose = (_event, reason) => {
     if (reason === "clickaway") {
       return;
     }
@@ -19,7 +19,7 @@ export default function CustomSnackbar({
   };
 
   return (
-    <Snackbar open={open} autoHideDuration={6000} onClose={onClose}>
+    <Snackbar open={open} autoHideDuration={5000} onClose={onClose}>
       <Alert
         onClose={handleClose}
         severity={severity}

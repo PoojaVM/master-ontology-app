@@ -18,7 +18,9 @@ export default function MoreMenu({ handleEdit, handleDelete }) {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleClose = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     setAnchorEl(null);
   };
 
@@ -26,14 +28,14 @@ export default function MoreMenu({ handleEdit, handleDelete }) {
     e.preventDefault();
     e.stopPropagation();
     handleEdit();
-    handleClose();
+    handleClose(e);
   };
 
   const onDeleteClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setOpenAlertDialog(true);
-    handleClose();
+    handleClose(e);
   };
 
   const handleDeleteAlertClose = () => {

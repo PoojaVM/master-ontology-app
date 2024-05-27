@@ -10,7 +10,7 @@ export const SnackbarProvider = ({ children }) => {
 
   const handleClose = () => {
     setOpen(false);
-    setSeverity("success");
+    setSeverity("");
     setMessage("");
   };
 

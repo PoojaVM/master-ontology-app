@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -13,56 +13,49 @@ import {
 } from "@mui/material";
 import MoreMenu from "./MoreMenu";
 import ConceptFormDialog from "./ConceptFormDialog";
-
-// Sample data - to be replaced by data from API call to DynamoDB
-const data = [
-  {
-    id: 1,
-    display_name: "Diagnosis",
-    description: "Entity domain",
-    parent_ids: null,
-    child_ids: [2, 3],
-    alternate_names: null,
-  },
-  {
-    id: 2,
-    display_name: "Disease of Nervous System",
-    description: "Diseases targeting the nervous system",
-    parent_ids: [1],
-    child_ids: [4],
-    alternate_names: null,
-  },
-  {
-    id: 3,
-    display_name: "Disease of Eye",
-    description: "Diseases targeting the eye",
-    parent_ids: [1],
-    child_ids: [8, 9],
-    alternate_names: null,
-  },
-  {
-    id: 4,
-    display_name: "Physical Disorders",
-    description: "Physical Disorders",
-    parent_ids: [1],
-    child_ids: [8, 9],
-    alternate_names: null,
-  },
-  {
-    id: 5,
-    display_name: "Multiple Sclerosis (MS)",
-    description: "Multiple Sclerosis",
-    parent_ids: [2, 4],
-    child_ids: [5, 6, 7],
-    alternate_names: ["MS", "name1", "name2"],
-  },
-];
+import apiService from "../api/concepts";
+import Loading from "./Loading";
+import { useSnackbar } from "../contexts/SnackbarContext";
+import { useAuth } from "../contexts/AuthContext";
+import  { ROLES } from "../constants";
 
 const Grid = () => {
-  const [selectedConcept, setSelectedConcept] = React.useState();
-  const onDeleteConcept = (id) => {
-    // Add logic to delete concept from the database
-    console.log(`Deleting concept with ID: ${id}`);
+  const { role } = useAuth();
+  const showSnackbar = useSnackbar();
+  const [concepts, setConcepts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedConcept, setSelectedConcept] = useState();
+  const canEdit = role === ROLES.ADMIN || role === ROLES.EDITOR;
+
+  const fetchConcepts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await apiService.getConcepts();
+      setConcepts(data);
+    } catch (error) {
+      showSnackbar("Error fetching concepts", "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+  , [showSnackbar]);
+
+  // API call to fetch concepts from the database
+  useEffect(() => {
+    fetchConcepts();
+  }, [fetchConcepts]);
+
+  const onDeleteConcept = async (row) => {
+    try {
+      setLoading(true);
+      await apiService.deleteConcept(row.id);
+      await fetchConcepts();
+      showSnackbar(`Concept "${row.display_name}" deleted successfully`, "success");
+    } catch (error) {
+      showSnackbar(`Error deleting concept "${row.display_name}"`, "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onEditConceptClick = (concept) => {
@@ -77,21 +70,33 @@ const Grid = () => {
     setSelectedConcept();
   };
 
+
+
   return (
     <div>
+      {
+        loading ? <Loading /> : null
+      }
       {selectedConcept && (
         <ConceptFormDialog
           open={!!selectedConcept}
           handleClose={onFormClose}
           concept={selectedConcept}
-          concepts={data}
+          concepts={concepts}
         />
       )}
       <Box display="flex" justifyContent="space-between" mb={2}>
-        <Typography variant="h4">Concepts</Typography>
-        <Button variant="contained" onClick={() => setSelectedConcept({})}>
-          + Create Concept
-        </Button>
+        <Typography variant="h4">Concepts</Typography>{
+          canEdit ? (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setSelectedConcept({})}
+            >
+              + Add New Concept
+            </Button>
+          ) : null
+        }
       </Box>
       <TableContainer component={Paper}>
         <Table>
@@ -103,11 +108,15 @@ const Grid = () => {
               <TableCell align="right">Parent Concept IDs</TableCell>
               <TableCell align="right">Child Concept IDs</TableCell>
               <TableCell align="right">Alternate Names</TableCell>
-              <TableCell align="center">Actions</TableCell>
+              {
+                canEdit ? (
+                  <TableCell align="center">Actions</TableCell>
+                ) : null
+              }
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map((row) => (
+            {concepts.map((row) => (
               <TableRow
                 key={row.id}
                 onClick={() => onEditConceptClick(row)}
@@ -125,12 +134,16 @@ const Grid = () => {
                 <TableCell align="right">
                   {row?.alternate_names?.join(", ")}
                 </TableCell>
-                <TableCell align="center">
-                  <MoreMenu
-                    handleEdit={() => onEditConceptClick(row)}
-                    handleDelete={() => onDeleteConcept(row.id)}
-                  />
-                </TableCell>
+                {
+                  canEdit ? (
+                    <TableCell align="center">
+                      <MoreMenu
+                        handleEdit={() => onEditConceptClick(row)}
+                        handleDelete={() => onDeleteConcept(row)}
+                      />
+                    </TableCell>
+                  ) : null
+                }
               </TableRow>
             ))}
           </TableBody>
