@@ -22,18 +22,19 @@ export async function addConcept(concept) {
   await client.connect();
 
   const query = `
-    INSERT INTO ontology_clinical_concepts (id, display_name, description, alternate_names)
-    VALUES ($1, $2, $3, $4)
+    INSERT INTO ontology_clinical_concepts (display_name, description, alternate_names)
+    VALUES ($1, $2, $3)
   `;
-  const values = [concept.id, concept.display_name, concept.description, concept.alternate_names];
+  const values = [concept.display_name, concept.description, concept.alternate_names];
 
-  await client.query(query, values);
+  const res = await client.query(query, values);
+  const newConceptId = res.rows[0].id;
 
   if (concept.parent_ids) {
     const parentIds = concept.parent_ids.split(',');
     for (const parentId of parentIds) {
       const parentQuery = 'INSERT INTO ontology_clinical_relationships (parent_id, child_id) VALUES ($1, $2)';
-      await client.query(parentQuery, [parentId, concept.id]);
+      await client.query(parentQuery, [parentId, newConceptId]);
     }
   }
 
@@ -41,7 +42,7 @@ export async function addConcept(concept) {
     const childIds = concept.child_ids.split(',');
     for (const childId of childIds) {
       const childQuery = 'INSERT INTO ontology_clinical_relationships (parent_id, child_id) VALUES ($1, $2)';
-      await client.query(childQuery, [concept.id, childId]);
+      await client.query(childQuery, [newConceptId, childId]);
     }
   }
 
