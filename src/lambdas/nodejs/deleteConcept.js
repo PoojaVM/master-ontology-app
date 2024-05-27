@@ -19,22 +19,34 @@ export async function deleteConcept(conceptId) {
     }
   });
 
-  await client.connect();
+  try {
+    await client.connect();
 
-  const deleteConceptQuery = 'DELETE FROM ontology_clinical_concepts WHERE id = $1';
-  await client.query(deleteConceptQuery, [conceptId]);
-
-  const deleteRelationshipsQuery = 'DELETE FROM ontology_clinical_relationships WHERE parent_id = $1 OR child_id = $1';
-  await client.query(deleteRelationshipsQuery, [conceptId]);
-
-  await client.end();
-
-  return {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    body: JSON.stringify({ message: 'Concept deleted' }),
-  };
+    const deleteConceptQuery = 'DELETE FROM ontology_clinical_concepts WHERE id = $1';
+    await client.query(deleteConceptQuery, [conceptId]);
+  
+    const deleteRelationshipsQuery = 'DELETE FROM ontology_clinical_relationships WHERE parent_id = $1 OR child_id = $1';
+    await client.query(deleteRelationshipsQuery, [conceptId]);
+  
+    await client.end();
+  
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
+      body: JSON.stringify({ message: 'Concept deleted' }),
+    };
+  } catch(error) {
+    await client.end();
+    return {
+      statusCode: 400,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
+      body: JSON.stringify({ message: error?.detail || 'Error deleting concept' }),
+    };
+  }
 }

@@ -71,35 +71,47 @@ export async function handler(event) {
   const method = event.httpMethod;
   const body = event.body ? JSON.parse(event.body) : null;
 
-  if (method === 'GET') {
-    return await getConcepts();
-  } else if (method === 'POST' || method === 'PUT' || method === 'DELETE') {
-    if (groups.includes('Admin') || groups.includes('Edit')) {
-      if (method === 'POST') {
-        return await addConcept(body);
-      } else if (method === 'PUT') {
-        return await updateConcept(body);
-      } else if (method === 'DELETE') {
-        return await deleteConcept(event.pathParameters.id);
+  try {
+    if (method === 'GET') {
+      return await getConcepts();
+    } else if (method === 'POST' || method === 'PUT' || method === 'DELETE') {
+      if (groups.includes('Admin') || groups.includes('Edit')) {
+        if (method === 'POST') {
+          return await addConcept(body);
+        } else if (method === 'PUT') {
+          return await updateConcept(body);
+        } else if (method === 'DELETE') {
+          return await deleteConcept(event.pathParameters.id);
+        }
+      } else {
+        return {
+          statusCode: 403,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': true,
+          },
+          body: JSON.stringify({ message: 'Forbidden' }),
+        };
       }
     } else {
       return {
-        statusCode: 403,
+        statusCode: 400,
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true,
         },
-        body: JSON.stringify({ message: 'Forbidden' }),
+        body: JSON.stringify({ message: 'Bad Request' }),
       };
     }
-  } else {
+  } catch (error) {
+    console.error('Error processing request', error);
     return {
-      statusCode: 400,
+      statusCode: 500,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
       },
-      body: JSON.stringify({ message: 'Bad Request' }),
+      body: JSON.stringify({ message: 'Internal server error' }),
     };
   }
 }
