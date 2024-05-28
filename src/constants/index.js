@@ -3,3 +3,10 @@ export const ROLES = {
     EDITOR: 'Edit',
     VIEWER: 'View'
 };
+
+export const ROLENAMES = {
+    'Admin': 'Admin',
+    'Edit': 'Editor',
+    'View': 'Viewer'
+};
+

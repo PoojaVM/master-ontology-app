@@ -1,6 +1,6 @@
 import axiosInstance from './axiosInstance';
 
-const apiService = {
+const conceptApiService = {
   async getConcepts() {
     try {
       const response = await axiosInstance.get('/concepts');
@@ -42,4 +42,4 @@ const apiService = {
   }
 };
 
-export default apiService;
+export default conceptApiService;

@@ -9,16 +9,20 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import Settings from "@mui/icons-material/Settings";
+import HomeIcon from "@mui/icons-material/Home";
 import Logout from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useSnackbar } from "../contexts/SnackbarContext";
+import { ROLES } from "../constants";
 
 export default function AccountMenu() {
-  const { authUser, logOut } = useAuth();
+  const { authUser, logOut, role } = useAuth();
+  const canEdit = role === ROLES.ADMIN;
   const showSnackbar = useSnackbar();
   const navigate = useNavigate();
+
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -27,7 +31,6 @@ export default function AccountMenu() {
   const handleClose = (e) => {
     e.preventDefault();
     e.stopPropagation();
-
     setAnchorEl(null);
   };
 
@@ -102,13 +105,24 @@ export default function AccountMenu() {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        {/* <MenuItem onClick={handleClose}>
+        <MenuItem onClick={() => navigate("/home")}>
           <ListItemIcon>
-            <Settings fontSize="small" />
+            <HomeIcon fontSize="small" />
           </ListItemIcon>
-          Change user permissions
+          Home
         </MenuItem>
-        <Divider /> */}
+        {
+          canEdit ? (
+            <>
+              <MenuItem onClick={() => navigate("/users")}>
+                <ListItemIcon>
+                  <Settings fontSize="small" />
+                </ListItemIcon>
+                Users
+              </MenuItem>
+            </>
+          ) : null
+        }
         <MenuItem onClick={handleSignOut}>
           <ListItemIcon>
             <Logout fontSize="small" />

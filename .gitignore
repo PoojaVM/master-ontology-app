@@ -23,5 +23,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # lambda function node_modules
-/src/lambdas/nodejs/node_modules
-/src/lambdas/nodejs/*.zip
+/src/lambdas/nodejs/handleConcepts/node_modules
+/src/lambdas/nodejs/handleConcepts/*.zip
+/src/lambdas/nodejs/handleUsers/node_modules
+/src/lambdas/nodejs/handleUsers/*.zip
+

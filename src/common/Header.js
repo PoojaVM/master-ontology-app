@@ -10,7 +10,7 @@ const Header = () => {
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Concept Viewer
+          Master Ontology
         </Typography>
         <Box display="flex" alignItems="center">
           <AccountMenu />

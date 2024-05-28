@@ -6,19 +6,109 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Autocomplete from "@mui/material/Autocomplete";
-import { Alert, AlertTitle, Box, Collapse } from "@mui/material";
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  CircularProgress,
+  Collapse,
+} from "@mui/material";
 import Loading from "./Loading";
 import { useSnackbar } from "../contexts/SnackbarContext";
 import LinearProgressWithLabel from "./LinearProgressWithLabel";
 import apiService from "../api/concepts";
 
-const filterConcepts = (concepts, conceptIds) => {
+import { debounce } from "lodash";
+
+function ConceptsAutoComplete({
+  value,
+  onChange,
+  label,
+  placeholder,
+  ...props
+}) {
+  const [concepts, setConcepts] = React.useState(value ?? []);
+  const [search, setSearch] = React.useState("");
+  const [debouncedSearch, setDebouncedSearch] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+
+  // Debounce the search input
+  React.useEffect(() => {
+    const handler = debounce((nextValue) => {
+      setDebouncedSearch(nextValue);
+    }, 300);
+
+    handler(search);
+
+    // Cleanup function to clear the timeout
+    return () => {
+      handler.cancel();
+    };
+  }, [search]);
+
+  // Fetch concepts based on the debounced search
+  React.useEffect(() => {
+    const fetchConcepts = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getConcepts({ search: debouncedSearch });
+        setConcepts(data.rows);
+      } catch (error) {
+        console.error("Error fetching concepts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (debouncedSearch?.length > 2) {
+      fetchConcepts();
+    }
+  }, [debouncedSearch]);
+
   return (
-    conceptIds
-      ?.map((conceptId) => concepts.find((concept) => concept.id === conceptId))
-      ?.filter((concept) => concept) || []
+    <Autocomplete
+      inputValue={search}
+      onInputChange={(_, newInputValue) => {
+        setSearch(newInputValue);
+      }}
+      multiple
+      options={concepts}
+      getOptionLabel={(concept) => concept.display_name + ` (${concept.id})`}
+      isOptionEqualToValue={(option, value) => option.id === value.id}
+      value={value}
+      onChange={onChange}
+      style={{ marginTop: "8px", marginBottom: "4px" }}
+      noOptionsText={
+        loading
+          ? "Loading..."
+          : search.length < 2
+          ? "Need min of 3 chars to search"
+          : "No concepts found"
+      }
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant="standard"
+          label={label}
+          placeholder={placeholder}
+          InputProps={{
+            ...params.InputProps,
+            endAdornment: (
+              <>
+                {loading ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : null}
+                {params.InputProps.endAdornment}
+              </>
+            ),
+          }}
+        />
+      )}
+      filterOptions={(x) => x}
+      {...props}
+    />
   );
-};
+}
 
 export default function ConceptFormDialog({
   open,
@@ -26,12 +116,8 @@ export default function ConceptFormDialog({
   afterSuccess,
   handleClose,
   concept,
-  concepts: conceptList = [],
 }) {
   const showSnackbar = useSnackbar();
-  const concepts = React.useMemo(() => {
-    return conceptList.filter((c) => c.id !== concept?.id);
-  }, [conceptList, concept]);
 
   const [displayName, setDisplayName] = React.useState(
     concept?.display_name || ""
@@ -42,12 +128,8 @@ export default function ConceptFormDialog({
   const [alternateNames, setAlternateNames] = React.useState(
     concept?.alternate_names?.join(", ") || ""
   );
-  const [parents, setParents] = React.useState(
-    filterConcepts(concepts, concept?.parent_ids) || []
-  );
-  const [childs, setChilds] = React.useState(
-    filterConcepts(concepts, concept?.child_ids) || []
-  );
+  const [parents, setParents] = React.useState(concept.parents || []);
+  const [childs, setChilds] = React.useState(concept.children || []);
 
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
@@ -129,7 +211,12 @@ export default function ConceptFormDialog({
       }
 
       await afterSuccess();
-      showSnackbar(`Concept "${conceptPayload.display_name}" ${concept.id ? 'updated' : 'added'}  successfully`, "success");
+      showSnackbar(
+        `Concept "${conceptPayload.display_name}" ${
+          concept.id ? "updated" : "added"
+        }  successfully`,
+        "success"
+      );
       setLoading(false);
     } catch (error) {
       console.error("Error submitting concept form", error);
@@ -151,16 +238,16 @@ export default function ConceptFormDialog({
     >
       {loading ? <Loading /> : null}
       <DialogTitle>
-        {concept?.id ? `${canEdit ? 'Edit' : 'View'} Concept - ${displayName}` : "Create Concept"}
+        {concept?.id
+          ? `${canEdit ? "Edit" : "View"} Concept - ${displayName}`
+          : "Create Concept"}
       </DialogTitle>
       <DialogContent>
-        {
-          canEdit ? (
-            <Box sx={{ width: "100%" }}>
-              <LinearProgressWithLabel value={progress} />
-            </Box>
-          ) : null
-        }
+        {canEdit ? (
+          <Box sx={{ width: "100%" }}>
+            <LinearProgressWithLabel value={progress} />
+          </Box>
+        ) : null}
         <TextField
           InputProps={{ readOnly: !canEdit }}
           required
@@ -199,40 +286,24 @@ export default function ConceptFormDialog({
             }
           }}
         />
-        <Autocomplete
-          readOnly={!canEdit}
-          multiple
+        <ConceptsAutoComplete
           id="parent-tags"
-          options={concepts}
-          getOptionLabel={(concept) =>
-            concept.display_name + ` (${concept.id})`
-          }
-          getOptionDisabled={(option) =>
-            concept?.id === option?.id ||
-            childs?.some((child) => child?.id === option?.id)
-          }
+          readOnly={!canEdit}
           value={parents}
           onChange={(_, newValue) => {
             setParents(newValue);
           }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="standard"
-              label="Parent Concepts"
-              placeholder="Add Parents"
-            />
-          )}
+          label="Parents"
+          placeholder="Add Parents"
           style={{ marginTop: "8px", marginBottom: "8px" }}
-        />
-        <Autocomplete
-          readOnly={!canEdit}
-          multiple
-          id="childs-tags"
-          options={concepts}
-          getOptionLabel={(concept) =>
-            concept.display_name + ` (${concept.id})`
+          getOptionDisabled={(option) =>
+            concept?.id === option?.id ||
+            childs?.some((child) => child?.id === option?.id)
           }
+        />
+        <ConceptsAutoComplete
+          id="childs-tags"
+          readOnly={!canEdit}
           getOptionDisabled={(option) =>
             concept?.id === option?.id ||
             parents?.some((parent) => parent?.id === option?.id)
@@ -241,15 +312,8 @@ export default function ConceptFormDialog({
           onChange={(_, newValue) => {
             setChilds(newValue);
           }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="standard"
-              label="Children"
-              placeholder="Add Children"
-            />
-          )}
-          style={{ marginTop: "8px", marginBottom: "4px" }}
+          label="Children"
+          placeholder="Add Children"
         />
         <TextField
           InputProps={{ readOnly: !canEdit }}
@@ -284,13 +348,11 @@ export default function ConceptFormDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        {
-          canEdit ? (
-            <Button type="submit" variant="contained" color="primary">
-              {concept?.id ? "Update" : "Add"}
-            </Button>
-          ) : null
-        }
+        {canEdit ? (
+          <Button type="submit" variant="contained" color="primary">
+            {concept?.id ? "Update" : "Add"}
+          </Button>
+        ) : null}
       </DialogActions>
     </Dialog>
   );

@@ -1,5 +1,5 @@
 import React from "react";
-import ConceptGrid from "./common/ConceptGrid";
+import UserGrid from "./common/UserGrid";
 import Header from "./common/Header";
 import { Box } from "@mui/material";
 
@@ -8,7 +8,7 @@ function Home() {
     <Box width="100vw">
       <Header />
       <Box pt={5} display="flex" justifyContent="center" minHeight="calc(100vh - 104px)">
-        <ConceptGrid />
+        <UserGrid />
       </Box>
     </Box>
   );

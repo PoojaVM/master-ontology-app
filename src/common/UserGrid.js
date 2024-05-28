@@ -10,10 +10,13 @@ import {
   Box,
   Typography,
   TablePagination,
+  Button,
 } from '@mui/material';
 import Loading from './Loading';
 import userApiService from '../api/users';
 import { useSnackbar } from '../contexts/SnackbarContext';
+import ChangeRoleDialog from './ChangeRoleDialog';
+import { ROLENAMES } from '../constants';
 
 const UserGrid = () => {
   const showSnackbar = useSnackbar();
@@ -23,6 +26,7 @@ const UserGrid = () => {
   const [limit, setLimit] = useState(10);
   const [loading, setLoading] = useState(true);
   const paginationToken = useRef(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -42,6 +46,12 @@ const UserGrid = () => {
     fetchUsers();
   }, [fetchUsers]);
 
+  const onRoleChange = async () => {
+    await fetchUsers();
+    setSelectedUser(null);
+  }
+
+
   const handleChangePage = (_, newPage) => {
     setPage(newPage);
   };
@@ -54,17 +64,26 @@ const UserGrid = () => {
   return (
     <div>
       {loading ? <Loading /> : null}
+      {selectedUser ? (
+        <ChangeRoleDialog
+          user={selectedUser}
+          open={!!selectedUser}
+          handleClose={() => setSelectedUser(null)}
+          afterChange={onRoleChange}
+        />
+      ) : null}
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Typography variant="h4">Users</Typography>
       </Box>
       <Paper sx={{ width: '100%', mb: 2 }}>
-        <TableContainer sx={{ maxHeight: '60vh' }}>
+        <TableContainer sx={{ maxHeight: '70vh', width: '70vw' }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
                 <TableCell>User Name</TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>Role</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -72,7 +91,16 @@ const UserGrid = () => {
                 <TableRow key={user.userName}>
                   <TableCell>{user.userName}</TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
+                  <TableCell>{ROLENAMES[user.role] || 'None'}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="text"
+                      color="primary"
+                      onClick={() => setSelectedUser(user)}
+                    >
+                      Change Role
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

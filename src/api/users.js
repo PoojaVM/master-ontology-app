@@ -12,6 +12,16 @@ const userAPIService = {
       throw error;
     }
   },
+
+  async updateUserRole({ id, newGroup }) {
+    try {
+      const response = await axiosInstance.put(`/users/${id}`, { newGroup });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      throw error;
+    }
+  }
 };
 
 export default userAPIService;
