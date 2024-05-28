@@ -11,12 +11,13 @@ import {
   Typography,
   TablePagination,
   Button,
+  Skeleton,
 } from '@mui/material';
-import Loading from './Loading';
 import userApiService from '../api/users';
 import { useSnackbar } from '../contexts/SnackbarContext';
 import ChangeRoleDialog from './ChangeRoleDialog';
 import { ROLENAMES } from '../constants';
+import StyledTableRow from './StyledTableRow';
 
 const UserGrid = () => {
   const showSnackbar = useSnackbar();
@@ -49,8 +50,7 @@ const UserGrid = () => {
   const onRoleChange = async () => {
     await fetchUsers();
     setSelectedUser(null);
-  }
-
+  };
 
   const handleChangePage = (_, newPage) => {
     setPage(newPage);
@@ -63,7 +63,6 @@ const UserGrid = () => {
 
   return (
     <div>
-      {loading ? <Loading /> : null}
       {selectedUser ? (
         <ChangeRoleDialog
           user={selectedUser}
@@ -87,22 +86,41 @@ const UserGrid = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.userName}>
-                  <TableCell>{user.userName}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{ROLENAMES[user.role] || 'None'}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="text"
-                      color="primary"
-                      onClick={() => setSelectedUser(user)}
-                    >
-                      Change Role
-                    </Button>
+              {loading ? (
+                Array.from(new Array(10)).map((_, index) => (
+                  <TableRow key={index} sx={{ padding: "16px" }}>
+                    <TableCell colSpan={8}>
+                      <Skeleton animation="wave" height={24} />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : users?.length ? (
+                users.map((user) => (
+                  <StyledTableRow
+                    key={user.userName}
+                    onClick={() => setSelectedUser(user)}
+                  >
+                    <TableCell>{user.userName}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{ROLENAMES[user.role] || "None"}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="text"
+                        color="primary"
+                        onClick={() => setSelectedUser(user)}
+                      >
+                        Change Role
+                      </Button>
+                    </TableCell>
+                  </StyledTableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    No users found
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>

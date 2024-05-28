@@ -5,7 +5,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { MenuItem, Select } from "@mui/material";
+import { FormControl, Grow, InputLabel, MenuItem, Select } from "@mui/material";
 import { ROLENAMES, ROLES } from "../constants";
 import { useSnackbar } from "../contexts/SnackbarContext";
 import Loading from "./Loading";
@@ -29,7 +29,10 @@ export default function ChangeRoleDialog({
     event.preventDefault();
     try {
       setLoading(true);
-      await userAPIService.updateUserRole({ id: user.userName, newGroup: role });
+      await userAPIService.updateUserRole({
+        id: user.userName,
+        newGroup: role,
+      });
       await afterChange();
       showSnackbar(
         `User "${user.userName}" role updated to "${role}" successfully.`,
@@ -47,6 +50,9 @@ export default function ChangeRoleDialog({
     <Dialog
       open={open}
       onClose={handleClose}
+      TransitionComponent={React.forwardRef(function Transition(props, ref) {
+        return <Grow ref={ref} {...props} />;
+      })}
       PaperProps={{
         component: "form",
         onSubmit,
@@ -58,23 +64,29 @@ export default function ChangeRoleDialog({
         <DialogContentText mb={2}>
           Please select the role that you want to assign to this user.
         </DialogContentText>
-        <Select
-          labelId="role-select-label"
-          id="role-select"
-          value={role}
-          label="Role"
-          onChange={handleChange}
-        >
-          {Object.keys(ROLENAMES).map((role) => (
-            <MenuItem value={role}>{ROLENAMES[role]}</MenuItem>
-          ))}
-        </Select>
+        <FormControl fullWidth>
+          <InputLabel id="role-select-label">Select Role</InputLabel>
+          <Select
+            labelId="role-select-label"
+            id="role-select"
+            value={role}
+            label="Select Role"
+            onChange={handleChange}
+            fullWidth
+          >
+            {Object.keys(ROLENAMES).map((role) => (
+              <MenuItem value={role}>{ROLENAMES[role]}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <DialogContentText mt={2}>
-          {
-            role === ROLES.ADMIN ? "Admins can manage all users and concepts."
-              : role === ROLES.EDITOR ? "Editors can manage concepts."
-              : role === ROLES.VIEWER ? "Viewers can view concepts." : ""
-          }
+          {role === ROLES.ADMIN
+            ? "Admins can manage all users and concepts."
+            : role === ROLES.EDITOR
+            ? "Editors can manage concepts."
+            : role === ROLES.VIEWER
+            ? "Viewers can view concepts."
+            : ""}
         </DialogContentText>
       </DialogContent>
       <DialogActions>

@@ -90,7 +90,7 @@ export async function handler(event) {
 
       return await getConcepts({ page, perPage, search, sortBy, sortOrder });
     } else if (method === "POST" || method === "PUT" || method === "DELETE") {
-      if (groups.includes("Admin") || groups.includes("Edit")) {
+      if (groups.includes("SuperAdmin") || groups.includes("Admin") || groups.includes("Edit")) {
         if (method === "POST") {
           return await addConcept(body);
         } else if (method === "PUT") {

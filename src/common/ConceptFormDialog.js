@@ -12,6 +12,7 @@ import {
   Box,
   CircularProgress,
   Collapse,
+  Grow,
 } from "@mui/material";
 import Loading from "./Loading";
 import { useSnackbar } from "../contexts/SnackbarContext";
@@ -218,6 +219,9 @@ export default function ConceptFormDialog({
       open={open}
       onClose={handleClose}
       fullWidth
+      TransitionComponent={React.forwardRef(function Transition(props, ref) {
+        return <Grow ref={ref} {...props} />;
+      })}
       PaperProps={{
         component: "form",
         noValidate: true,

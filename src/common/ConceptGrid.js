@@ -12,27 +12,63 @@ import {
   Button,
   TablePagination,
   TableSortLabel,
+  Skeleton,
+  Tooltip,
 } from "@mui/material";
 import MoreMenu from "./MoreMenu";
 import ConceptFormDialog from "./ConceptFormDialog";
 import apiService from "../api/concepts";
-import Loading from "./Loading";
 import { useSnackbar } from "../contexts/SnackbarContext";
 import { useAuth } from "../contexts/AuthContext";
 import { ROLES } from "../constants";
 import { visuallyHidden } from "@mui/utils";
+import SearchInput from "./SearchInput";
+import StyledTableRow from "./StyledTableRow";
 
 const sortableHeaderCells = [
-  { id: "id", label: "Concept ID", disablePadding: true, numeric: true },
-  { id: "display_name", label: "Display Name", disablePadding: false },
+  {
+    id: "id",
+    label: "Concept ID",
+    disablePadding: true,
+    numeric: true,
+    width: 100,
+  },
+  {
+    id: "display_name",
+    label: "Display Name",
+    disablePadding: false,
+    numeric: false,
+    width: 200,
+  },
 ];
 
 const unsortableHeaderCells = [
-  { id: "description", label: "Description" },
-  { id: "parent_ids", label: "Parent IDs", numeric: true },
-  { id: "child_ids", label: "Child IDs", numeric: true },
-  { id: "alternate_names", label: "Alternate Names" },
+  { id: "description", label: "Description", numeric: false, width: 300 },
+  { id: "parent_ids", label: "Parent IDs", numeric: true, width: 200 },
+  { id: "child_ids", label: "Child IDs", numeric: true, width: 200 },
+  {
+    id: "alternate_names",
+    label: "Alternate Names",
+    numeric: false,
+    width: 200,
+  },
 ];
+
+const ConceptIdsWithTooltip = ({ concepts }) => {
+  return (
+    <Tooltip
+      title={
+        <div style={{ whiteSpace: "pre-line" }}>
+          {concepts
+            ?.map(({ id, display_name }) => `${display_name} (${id})`)
+            ?.join("\n")}
+        </div>
+      }
+    >
+      {concepts?.map(({ id }) => id)?.join(", ")}
+    </Tooltip>
+  );
+};
 
 const ConceptGrid = () => {
   const { role } = useAuth();
@@ -43,6 +79,7 @@ const ConceptGrid = () => {
   const [perPage, setPerPage] = useState(10);
   const [sortBy, setSortBy] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [search, setSearch] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [selectedConcept, setSelectedConcept] = useState();
@@ -50,12 +87,17 @@ const ConceptGrid = () => {
 
   const fetchConcepts = useCallback(async () => {
     try {
+      if (search.length && search.length < 3) {
+        return;
+      }
+
       setLoading(true);
       const data = await apiService.getConcepts({
         page: page + 1,
         perPage,
         sortBy,
         sortOrder,
+        search,
       });
       setConcepts(data.rows);
       setTotalCount(Number(data.totalCount));
@@ -64,9 +106,8 @@ const ConceptGrid = () => {
     } finally {
       setLoading(false);
     }
-  }, [showSnackbar, page, perPage, sortBy, sortOrder]);
+  }, [showSnackbar, page, perPage, sortBy, sortOrder, search]);
 
-  // API call to fetch concepts from the database
   useEffect(() => {
     fetchConcepts();
   }, [fetchConcepts]);
@@ -117,7 +158,6 @@ const ConceptGrid = () => {
 
   return (
     <div>
-      {loading ? <Loading /> : null}
       {selectedConcept && (
         <ConceptFormDialog
           open={!!selectedConcept}
@@ -129,7 +169,12 @@ const ConceptGrid = () => {
       )}
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Typography variant="h4">Concepts</Typography>
-        <Box>
+        <Box display="flex" alignItems="center">
+          <SearchInput
+            placeholder="Search Concepts"
+            onSearch={setSearch}
+            sx={{ width: 300, marginRight: 2 }}
+          />
           {canEdit ? (
             <Button
               variant="contained"
@@ -152,11 +197,13 @@ const ConceptGrid = () => {
                     align={headCell.numeric ? "right" : "left"}
                     padding={headCell.disablePadding ? "none" : "normal"}
                     sortDirection={sortBy === headCell.id ? sortOrder : false}
+                    width={headCell.width}
                   >
                     <TableSortLabel
                       active={sortBy === headCell.id}
                       direction={sortBy === headCell.id ? sortOrder : "asc"}
                       onClick={createSortHandler(headCell.id)}
+                      sx={{ textDecoration: "underline" }}
                     >
                       {headCell.label}
                       {sortBy === headCell.id ? (
@@ -173,6 +220,7 @@ const ConceptGrid = () => {
                   <TableCell
                     key={headCell.id}
                     align={headCell.numeric ? "right" : "left"}
+                    width={headCell.width}
                   >
                     {headCell.label}
                   </TableCell>
@@ -181,36 +229,62 @@ const ConceptGrid = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {concepts.map((row) => (
-                <TableRow
-                  key={row.id}
-                  onClick={() => onEditConceptClick(row)}
-                  sx={{ cursor: "pointer" }}
-                >
-                  <TableCell component="th" scope="row" align="right">
-                    {row.id}
-                  </TableCell>
-                  <TableCell align="left">{row.display_name}</TableCell>
-                  <TableCell align="left">{row.description}</TableCell>
-                  <TableCell align="right">
-                    {row.parents?.map(({ id }) => id)?.join(", ")}
-                  </TableCell>
-                  <TableCell align="right">
-                    {row.children?.map(({ id }) => id)?.join(", ")}
-                  </TableCell>
-                  <TableCell align="right">
-                    {row?.alternate_names?.join(", ")}
-                  </TableCell>
-                  {canEdit ? (
-                    <TableCell align="center">
-                      <MoreMenu
-                        handleEdit={() => onEditConceptClick(row)}
-                        handleDelete={() => onDeleteConcept(row)}
-                      />
+              {loading ? (
+                Array.from(new Array(10)).map((_, index) => (
+                  <TableRow key={index} sx={{ padding: "16px" }}>
+                    <TableCell colSpan={8}>
+                      <Skeleton animation="wave" height={24} />
                     </TableCell>
-                  ) : null}
+                  </TableRow>
+                ))
+              ) : concepts?.length ? (
+                concepts.map((row) => (
+                  <StyledTableRow
+                    key={row.id}
+                    onClick={() => onEditConceptClick(row)}
+                  >
+                    <TableCell component="th" scope="row" align="right">
+                      {row.id}
+                    </TableCell>
+                    {/* Use ellipsis */}
+                    <TableCell align="left">{row.display_name}</TableCell>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: 300,
+                      }}
+                    >
+                      {row.description}
+                    </TableCell>
+                    <TableCell align="right">
+                      <ConceptIdsWithTooltip concepts={row.parents} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <ConceptIdsWithTooltip concepts={row.children} />
+                    </TableCell>
+                    <TableCell align="left">
+                      {row?.alternate_names?.join(", ")}
+                    </TableCell>
+                    {canEdit ? (
+                      <TableCell align="center">
+                        <MoreMenu
+                          handleEdit={() => onEditConceptClick(row)}
+                          handleDelete={() => onDeleteConcept(row)}
+                        />
+                      </TableCell>
+                    ) : null}
+                  </StyledTableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={8} align="center">
+                    No concepts found
+                  </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>

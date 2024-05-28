@@ -16,6 +16,9 @@ const lightTheme = createTheme({
       primary: '#212121',
       secondary: '#757575',
     },
+    action: {
+      hover: 'rgba(0, 0, 0, 0.04)',
+    },
   },
 });
 
@@ -34,6 +37,9 @@ const darkTheme = createTheme({
     text: {
       primary: '#ffffff',
       secondary: '#b0bec5',
+    },
+    action: {
+      hover: 'rgba(255, 255, 255, 0.04)',
     },
   },
 });

@@ -37,7 +37,7 @@ async function isAdmin(userPoolId, username) {
   };
 
   const data = await cognitoClient.adminListGroupsForUser(params).promise();
-  return data.Groups.some(group => group.GroupName === 'Admin');
+  return data.Groups.some(group => group.GroupName === 'SuperAdmin' || group.GroupName === 'Admin');
 }
 
 export const handler = async (event) => {
@@ -72,18 +72,19 @@ export const handler = async (event) => {
 
   const username = decodedToken['cognito:username'];
 
+  const isAdminUser = await isAdmin(userPoolId, username);
+  if (!isAdminUser) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({ message: 'Forbidden' }),
+    };
+  }
+
   const method = event.httpMethod;
   if (method === 'GET') {
     console.log('Test GET:', event);
     return await listUsers(event);
   } else if (method === 'PUT') {
-    const isAdminUser = await isAdmin(userPoolId, username);
-    if (!isAdminUser) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify({ message: 'Forbidden' }),
-      };
-    }
     return await updateUserPermission(event);
   } else {
     return {
