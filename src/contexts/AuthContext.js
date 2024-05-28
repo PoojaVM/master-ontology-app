@@ -24,7 +24,6 @@ export const AuthProvider = ({ children }) => {
         if (token) {
           const id = addRequestInterceptors(token);
           interceptorId.current = id;
-          console.log('Request interceptor added', id);
         }
       } catch (error) {
         setAuthUser(null);

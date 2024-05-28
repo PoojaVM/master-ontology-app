@@ -41,7 +41,6 @@ async function isAdmin(userPoolId, username) {
 }
 
 export const handler = async (event) => {
-  console.log('Test Event:', JSON.stringify(event, null, 2));
   const authorizationHeader = event.headers.Authorization || event.headers.authorization;
 
   if (!authorizationHeader) {
@@ -82,7 +81,6 @@ export const handler = async (event) => {
 
   const method = event.httpMethod;
   if (method === 'GET') {
-    console.log('Test GET:', event);
     return await listUsers(event);
   } else if (method === 'PUT') {
     return await updateUserPermission(event);
