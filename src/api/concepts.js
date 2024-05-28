@@ -1,9 +1,17 @@
 import axiosInstance from './axiosInstance';
 
 const conceptApiService = {
-  async getConcepts() {
+  async getConcepts({ search, page, perPage, sortBy, sortOrder} = {}) {
     try {
-      const response = await axiosInstance.get('/concepts');
+      const response = await axiosInstance.get('/concepts', {
+        params: {
+          page: page ?? 1,
+          perPage: perPage ?? 10,
+          search,
+          sortBy: sortBy ?? 'id',
+          sortOrder: sortOrder ?? 'asc',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching concepts:', error);

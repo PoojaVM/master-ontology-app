@@ -18,7 +18,7 @@ import { useSnackbar } from "../contexts/SnackbarContext";
 import LinearProgressWithLabel from "./LinearProgressWithLabel";
 import apiService from "../api/concepts";
 
-import { debounce } from "lodash";
+import useDebouncedInput from "../hooks/useDebouncedInput";
 
 function ConceptsAutoComplete({
   value,
@@ -28,25 +28,13 @@ function ConceptsAutoComplete({
   ...props
 }) {
   const [concepts, setConcepts] = React.useState(value ?? []);
-  const [search, setSearch] = React.useState("");
-  const [debouncedSearch, setDebouncedSearch] = React.useState("");
+  const {
+    inputValue: search,
+    setInputValue: setSearch,
+    debouncedValue: debouncedSearch,
+  } = useDebouncedInput();
   const [loading, setLoading] = React.useState(false);
 
-  // Debounce the search input
-  React.useEffect(() => {
-    const handler = debounce((nextValue) => {
-      setDebouncedSearch(nextValue);
-    }, 300);
-
-    handler(search);
-
-    // Cleanup function to clear the timeout
-    return () => {
-      handler.cancel();
-    };
-  }, [search]);
-
-  // Fetch concepts based on the debounced search
   React.useEffect(() => {
     const fetchConcepts = async () => {
       try {
@@ -81,7 +69,7 @@ function ConceptsAutoComplete({
       noOptionsText={
         loading
           ? "Loading..."
-          : search.length < 2
+          : search.length <= 2
           ? "Need min of 3 chars to search"
           : "No concepts found"
       }
