@@ -30,12 +30,6 @@ export default function ChangeRoleDialog({
     }
 
     const roles = { ...ROLENAMES };
-    delete roles[ROLES.SUPER_ADMIN];
-
-    // // If current user role is super admin, then keep it in the list
-    // // so we can disable it in the dropdown.
-    // if (user.role !== ROLES.SUPER_ADMIN) {
-    // }
 
     return roles;
   }, [currentUserRole]);
@@ -48,10 +42,9 @@ export default function ChangeRoleDialog({
     if (user.role === ROLES.SUPER_ADMIN) {
       return true;
     }
-
     return currentUserRole === ROLES.SUPER_ADMIN
       ? false
-      : user.role === ROLES.ADMIN;
+      : user.role === ROLES.ADMIN && currentUserRole === ROLES.ADMIN;
   }, [currentUserRole, user.role]);
 
   const handleChange = (event) => {
@@ -106,15 +99,17 @@ export default function ChangeRoleDialog({
             disabled={cannotChangeRole}
           >
             {Object.keys(rolesMap).map((value) => (
-              <MenuItem key={value} value={value} disabled={value === ROLES.SUPER_ADMIN}>
+              <MenuItem
+                key={value}
+                value={value}
+                disabled={
+                  value === ROLES.SUPER_ADMIN
+                  || (value === ROLES.ADMIN && currentUserRole !== ROLES.SUPER_ADMIN)
+              }
+              >
                 {rolesMap[value]}
               </MenuItem>
             ))}
-            {user.role === ROLES.SUPER_ADMIN ? (
-              <MenuItem key={user.role} value={ROLES.SUPER_ADMIN} disabled>
-                {ROLENAMES.SuperAdmin}
-              </MenuItem>
-            ) : null}
           </Select>
         </FormControl>
         <DialogContentText mt={2}>
@@ -123,10 +118,10 @@ export default function ChangeRoleDialog({
             : role === ROLES.ADMIN
             ? "Admins can manage all users and concepts." +
               (currentUserRole === ROLES.ADMIN
-                ? " You cannot change admin role."
+                ? " You cannot change user's role once it is set to Admin."
                 : "")
             : role === ROLES.EDITOR
-            ? "Editors can manage concepts."
+            ? "Editors can create and update concepts."
             : role === ROLES.VIEWER
             ? "Viewers can view concepts."
             : ""}
