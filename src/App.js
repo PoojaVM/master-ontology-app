@@ -3,6 +3,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import { withAuthenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import Home from "./Home";
+import Users from "./Users";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import {darkTheme, lightTheme} from "./styles/theme";
 import { ThemeProvider, CssBaseline } from "@mui/material";
@@ -29,12 +30,18 @@ function App({ signOut }) {
       <Routes>
         <Route
           path="/home"
-          element={authUser ? <Home signOut={signOut} /> : <Navigate to="/" />}
+          element={authUser ? <Home /> : <Navigate to="/" />}
         />
         <Route
           path="/"
           element={
             authUser ? <Navigate to="/home" /> : <Navigate to="/login" />
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <Users />
           }
         />
       </Routes>
