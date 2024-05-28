@@ -20,10 +20,10 @@ import ConceptFormDialog from "./ConceptFormDialog";
 import apiService from "../api/concepts";
 import { useSnackbar } from "../contexts/SnackbarContext";
 import { useAuth } from "../contexts/AuthContext";
-import { ROLES } from "../constants";
 import { visuallyHidden } from "@mui/utils";
 import SearchInput from "./SearchInput";
 import StyledTableRow from "./StyledTableRow";
+import { canManageConcepts } from "../utils";
 
 const sortableHeaderCells = [
   {
@@ -65,7 +65,9 @@ const ConceptIdsWithTooltip = ({ concepts }) => {
         </div>
       }
     >
-      {concepts?.map(({ id }) => id)?.join(", ")}
+      <span>
+        {concepts?.map(({ id }) => id)?.join(", ")}
+      </span>
     </Tooltip>
   );
 };
@@ -83,7 +85,7 @@ const ConceptGrid = () => {
 
   const [loading, setLoading] = useState(true);
   const [selectedConcept, setSelectedConcept] = useState();
-  const canEdit = role === ROLES.ADMIN || role === ROLES.EDITOR;
+  const canEdit = canManageConcepts(role);
 
   const fetchConcepts = useCallback(async () => {
     try {
@@ -173,7 +175,7 @@ const ConceptGrid = () => {
           <SearchInput
             placeholder="Search Concepts"
             onSearch={setSearch}
-            sx={{ width: 300, marginRight: 2 }}
+            sx={{ width: 300, marginRight: canEdit ? 2 : 0 }}
           />
           {canEdit ? (
             <Button

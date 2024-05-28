@@ -9,12 +9,12 @@ import {darkTheme, lightTheme} from "./styles/theme";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { SnackbarProvider } from "./contexts/SnackbarContext";
 import Loading from "./common/Loading";
-import { ROLES } from "./constants";
+import { canManageUsers } from "./utils";
 
 function App() {
   const { authUser, loading, role } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const isAdmin = role === ROLES.ADMIN;
+  const canViewUsersPage = canManageUsers(role);
 
   // Set dark mode based on user's system preferences
   useEffect(() => {
@@ -42,7 +42,7 @@ function App() {
         />
         <Route
           path="/users"
-          element={isAdmin ? <Users /> : <Navigate to="/" />}
+          element={canViewUsersPage ? <Users /> : <Navigate to="/" />}
         />
       </Routes>
     </ThemeProvider>

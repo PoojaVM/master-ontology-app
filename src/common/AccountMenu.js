@@ -6,7 +6,6 @@ import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import Tooltip from "@mui/material/Tooltip";
 import Person from "@mui/icons-material/Person2TwoTone";
 import HomeIcon from "@mui/icons-material/Home";
 import Logout from "@mui/icons-material/Logout";
@@ -14,11 +13,13 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useSnackbar } from "../contexts/SnackbarContext";
-import { ROLES } from "../constants";
+import { canManageUsers } from "../utils";
+import { ROLENAMES } from "../constants";
+import { Chip } from "@mui/material";
 
 export default function AccountMenu() {
   const { authUser, logOut, role } = useAuth();
-  const canEdit = role === ROLES.ADMIN;
+  const canViewUsersPage = canManageUsers(role);
   const showSnackbar = useSnackbar();
   const navigate = useNavigate();
 
@@ -51,21 +52,25 @@ export default function AccountMenu() {
   return (
     <React.Fragment>
       <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
-        <Typography sx={{ minWidth: 100 }}>Welcome, {username}</Typography>
-        <Tooltip title="Account">
-          <IconButton
-            onClick={handleClick}
-            size="small"
-            sx={{ ml: 2 }}
-            aria-controls={open ? "account-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? "true" : undefined}
-          >
+        <Typography sx={{ minWidth: 100 }}>
+          Welcome {ROLENAMES[role].toUpperCase()}
+        </Typography>
+        <Chip
+          sx={{ ml: 2, color: "white", bgcolor: "primary.main" }}
+          avatar={
             <Avatar sx={{ width: 32, height: 32 }}>
               {username?.[0]?.toUpperCase()}
             </Avatar>
-          </IconButton>
-        </Tooltip>
+          }
+          label={username}
+          clickable
+          component={IconButton}
+          variant="outlined"
+          onClick={handleClick}
+          aria-controls={open ? "account-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+        />
       </Box>
       <Menu
         anchorEl={anchorEl}
@@ -110,18 +115,14 @@ export default function AccountMenu() {
           </ListItemIcon>
           Home
         </MenuItem>
-        {
-          canEdit ? (
-            <>
-              <MenuItem onClick={() => navigate("/users")}>
-                <ListItemIcon>
-                  <Person fontSize="small" />
-                </ListItemIcon>
-                Users
-              </MenuItem>
-            </>
-          ) : null
-        }
+        {canViewUsersPage ? (
+          <MenuItem onClick={() => navigate("/users")}>
+            <ListItemIcon>
+              <Person fontSize="small" />
+            </ListItemIcon>
+            Users
+          </MenuItem>
+        ) : null}
         <MenuItem onClick={handleSignOut}>
           <ListItemIcon>
             <Logout fontSize="small" />

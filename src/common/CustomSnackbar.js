@@ -26,7 +26,7 @@ export default function CustomSnackbar({
         variant="filled"
         sx={{ width: "100%" }}
       >
-        {children}
+        {children || ""}
       </Alert>
     </Snackbar>
   );
@@ -39,7 +39,3 @@ CustomSnackbar.propTypes = {
   children: PropTypes.any,
 };
 
-CustomSnackbar.defaultProps = {
-  open: false,
-  children: "",
-};

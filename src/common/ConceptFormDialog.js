@@ -219,9 +219,6 @@ export default function ConceptFormDialog({
       open={open}
       onClose={handleClose}
       fullWidth
-      TransitionComponent={React.forwardRef(function Transition(props, ref) {
-        return <Grow ref={ref} {...props} />;
-      })}
       PaperProps={{
         component: "form",
         noValidate: true,
