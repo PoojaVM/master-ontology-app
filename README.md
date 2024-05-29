@@ -34,7 +34,7 @@ https://github.com/PoojaVM/master-ontology-app
         - Admin: 
             - Username: ontologyadmin
             - Password: Test@123
-        - Editor:
+        - Editor: Ontology team members should be assigned this role.
             - Username: pmule
             - Password: Test@123
         - Viewer:
@@ -79,7 +79,9 @@ https://github.com/PoojaVM/master-ontology-app
 ### UI Design:
 1. The UI is available in both light and dark mode.
 2. Material-UI is used for designing the application.
-3. The UI is build with a Desktop client in mind. Mobile responsiveness is not explicitly handled but can be managed using Material-UI.
+3. Loaders are displayed for API calls.
+4. Acknowledgement messages are displayed for successful operations.
+5. The UI is build with a Desktop client in mind. Mobile responsiveness is not explicitly handled but can be managed using Material-UI.
 
 ### Database Schema
 
@@ -121,10 +123,11 @@ CREATE TABLE ontology_clinical_relationships (
 4. React Router: For routing in the application.
 
 ### Local Setup Instructions:
-1. Clone the repository.
-2. Run `npm install` to install the dependencies.
-3. Run `npm start` to start the application.
-4. Use same credentials as mentioned above to login.
+1. Pre-requisites: NodeJS, NPM, GIT
+2. Clone the GIT repository.
+3. Run `npm install` to install the dependencies.
+4. Run `npm start` to start the application.
+5. Use same credentials as mentioned above to login.
 
 ## TASK 2: Target Application Architecture:
 - This is the Master Ontolgy Application Architecture: ![Master Ontology App Architecture)](./docs/architecture-diagram.png)
@@ -167,17 +170,22 @@ CREATE TABLE ontology_clinical_relationships (
     - DDoS Protection:
         - Use AWS Shield for protecting the application from DDoS attacks ensuring high availability.
 
-## TASK 3: Questions for Ontology Team
-1. How many concepts can a concept have as parents and children?
-2. To what level should the parent-child hierarchy be strictly enforced?
-3. How often do the permissions change for the users?
-4. What are good performance metrics for the application?
-5. What are the most common operations performed on the concepts?
-6. How many users are expected to use the application?
-7. What additional features are expected in the application?
-8. What is the user feedback on the current application?
-9. Are they looking for accessibility features in the application?
-
+## TASK 3: Meet with Ontology Team
+- Proposals:
+    1. Using AWS Glue for CSV data transformation.
+    2. Adding frontend functionality for CSV data upload.
+- Concerns:
+    1. As an app with potentially sensitive clinical data, how is the compliance ensured?
+- Questions:
+    1. What is the performance expectation for the application?
+    2. How many concepts can a concept have as parents and children?
+    3. To what level should the parent-child hierarchy be strictly enforced?
+    4. How often do the permissions change for the users?
+    5. What are the most common operations performed on the concepts to ensure performance?
+    6. How many users are expected to use the application?
+    7. What additional features are expected in the application?
+    8. What is the user feedback on the current application?
+    9. Are they looking for accessibility features in the application?
 
 ### Thank you for the opportunity!
 
