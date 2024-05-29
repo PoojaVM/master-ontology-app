@@ -12,7 +12,6 @@ import {
   Box,
   CircularProgress,
   Collapse,
-  Grow,
 } from "@mui/material";
 import Loading from "./Loading";
 import { useSnackbar } from "../contexts/SnackbarContext";
@@ -28,7 +27,7 @@ function ConceptsAutoComplete({
   placeholder,
   ...props
 }) {
-  const [concepts, setConcepts] = React.useState(value ?? []);
+  const [concepts, setConcepts] = React.useState([]);
   const {
     inputValue: search,
     setInputValue: setSearch,
@@ -49,7 +48,7 @@ function ConceptsAutoComplete({
       }
     };
 
-    if (debouncedSearch?.length > 2) {
+    if (debouncedSearch?.length) {
       fetchConcepts();
     }
   }, [debouncedSearch]);
@@ -71,7 +70,7 @@ function ConceptsAutoComplete({
         loading
           ? "Loading..."
           : search.length <= 2
-          ? "Need min of 3 chars to search"
+          ? "Start typing to search concepts..."
           : "No concepts found"
       }
       renderInput={(params) => (

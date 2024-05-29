@@ -152,7 +152,7 @@ const ConceptGrid = () => {
     handleRequestSort(event, property);
   };
 
-  const handleRequestSort = (event, property) => {
+  const handleRequestSort = (_event, property) => {
     const isAsc = sortBy === property && sortOrder === "asc";
     setSortOrder(isAsc ? "desc" : "asc");
     setSortBy(property);
