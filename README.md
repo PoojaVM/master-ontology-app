@@ -19,7 +19,7 @@ https://github.com/PoojaVM/master-ontology-app
     - `updateUserPermission`: Update user role in the database.
 
 ### Usage Instructions:
-1. The application can be accessed using ![this link](https://master.d2aukg2a51vgnk.amplifyapp.com).
+1. The application can be accessed using [this link](https://master.d2aukg2a51vgnk.amplifyapp.com).
 2. Permissions:
     - Application has 4 types of users: Super Admin, Admin, Editor, and Viewer.
     - Super Admin: Can add other users and assign roles. Can also add, edit and delete concepts. There is only one super admin.
@@ -51,7 +51,16 @@ https://github.com/PoojaVM/master-ontology-app
         - Change user roles
             - Admin can only assign Editor and Viewer roles
             - Super Admin can assign Admin, Editor, and Viewer roles
-
+    4. Validations and Error Handling:
+        - Frontend:
+            - Form validations are done as per the DB schema.
+            - Error messages are displayed for invalid inputs.
+            - Users are shown only the routes they have access to.
+        - Backend:
+            - Error messages are displayed for failed operations.
+            - Permission based access is implemented.
+    5. Notifications:
+        - Notifications are displayed for successful and failed operations.
 ### Assumptions:
 1. Concepts
     - Concepts can have multiple parents and children.
