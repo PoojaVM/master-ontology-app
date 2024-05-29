@@ -17,6 +17,7 @@ import Loading from "./Loading";
 import { useSnackbar } from "../contexts/SnackbarContext";
 import LinearProgressWithLabel from "./LinearProgressWithLabel";
 import apiService from "../api/concepts";
+import CustomTextField from "./CustomTextField";
 
 import useDebouncedInput from "../hooks/useDebouncedInput";
 
@@ -74,7 +75,7 @@ function ConceptsAutoComplete({
           : "No concepts found"
       }
       renderInput={(params) => (
-        <TextField
+        <CustomTextField
           {...params}
           variant="standard"
           label={label}
@@ -236,7 +237,7 @@ export default function ConceptFormDialog({
             <LinearProgressWithLabel value={progress} />
           </Box>
         ) : null}
-        <TextField
+        <CustomTextField
           InputProps={{ readOnly: !canEdit }}
           required
           margin="dense"
@@ -254,7 +255,7 @@ export default function ConceptFormDialog({
             }
           }}
         />
-        <TextField
+        <CustomTextField
           InputProps={{ readOnly: !canEdit }}
           required
           margin="dense"
@@ -303,7 +304,7 @@ export default function ConceptFormDialog({
           label="Children"
           placeholder="Add Children"
         />
-        <TextField
+        <CustomTextField
           InputProps={{ readOnly: !canEdit }}
           margin="dense"
           id="alternateNames"
