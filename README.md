@@ -22,10 +22,10 @@ https://github.com/PoojaVM/master-ontology-app
 1. The application can be accessed using [this link](https://master.d2aukg2a51vgnk.amplifyapp.com).
 2. Permissions:
     - Application has 4 types of users: Super Admin, Admin, Editor, and Viewer.
-    - Super Admin: Can add other users and assign roles. Can also add, edit and delete concepts. There is only one super admin.
-    - Admin: Can add other users and assign only Editor and Viewer roles. Can also add, edit and delete concepts.
+    - Super Admin: Can assign roles to any users. Can also add, edit and delete concepts. There is only one super admin.
+    - Admin: Can assign only Editor and Viewer roles. Can also add, edit and delete concepts.
     - Editor: Can add, edit and delete concepts.
-    - Viewer: Can only view the concepts. Can use filter functionality.
+    - Viewer: Can only view the concepts.
 3. Login:
     - Use the following credentials to login:
         - Super Admin:
@@ -43,6 +43,7 @@ https://github.com/PoojaVM/master-ontology-app
 4. Features:
     1. SAML Authentication
         - User can signup and signin using SAML authentication.
+        - AWS Cognito is used for user authentication using Federated Identities.
     2. Concepts
         - View, sort, and search concepts
         - Add, edit and delete concepts (Only for Super Admin, Admin, and Editor)
