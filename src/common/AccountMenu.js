@@ -16,8 +16,11 @@ import { useSnackbar } from "../contexts/SnackbarContext";
 import { canManageUsers } from "../utils";
 import { ROLENAMES } from "../constants";
 import { Chip } from "@mui/material";
+import { useTheme } from '@mui/material/styles';
 
 export default function AccountMenu() {
+  const theme = useTheme();
+  const iconColor = theme.palette.text.primary;
   const { authUser, logOut, role } = useAuth();
   const canViewUsersPage = canManageUsers(role);
   const showSnackbar = useSnackbar();
@@ -110,21 +113,21 @@ export default function AccountMenu() {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         <MenuItem onClick={() => navigate("/home")}>
-          <ListItemIcon>
+          <ListItemIcon style={{ color: iconColor }}>
             <HomeIcon fontSize="small" />
           </ListItemIcon>
           Home
         </MenuItem>
         {canViewUsersPage ? (
           <MenuItem onClick={() => navigate("/users")}>
-            <ListItemIcon>
+            <ListItemIcon style={{ color: iconColor }}>
               <Person fontSize="small" />
             </ListItemIcon>
             Users
           </MenuItem>
         ) : null}
         <MenuItem onClick={handleSignOut}>
-          <ListItemIcon>
+          <ListItemIcon style={{ color: iconColor }}>
             <Logout fontSize="small" />
           </ListItemIcon>
           Sign out
