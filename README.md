@@ -32,7 +32,7 @@ https://github.com/PoojaVM/master-ontology-app
             - Username: ontologysuperuser
             - Password: Test@123
         - Admin: 
-            - Username: poojavm1595
+            - Username: ontologyadmin
             - Password: Test@123
         - Editor:
             - Username: pmule
@@ -45,18 +45,19 @@ https://github.com/PoojaVM/master-ontology-app
         - User can signup and signin using SAML authentication.
         - AWS Cognito is used for user authentication using Federated Identities.
     2. Concepts
-        - View, sort, and search concepts
+        - View, sort, and search concepts with pagination.
         - Add, edit and delete concepts (Only for Super Admin, Admin, and Editor)
     3. Users (Only for Super Admin and Admin)
-        - View users
+        - View users with pagination.
         - Change user roles
             - Admin can only assign Editor and Viewer roles
             - Super Admin can assign Admin, Editor, and Viewer roles
     4. Validations and Error Handling:
         - Frontend:
-            - Form validations are done as per the DB schema.
+            - Form validations are done as per the DB schema available in the README.
             - Error messages are displayed for invalid inputs.
-            - Users are shown only the routes they have access to.
+            - Users are shown only the routes they have access to and are redirected to the home page if they try to access unauthorized routes.
+            - UI is role based and only the allowed actions are displayed.
         - Backend:
             - Error messages are displayed for failed operations.
             - Permission based access is implemented.
@@ -65,18 +66,20 @@ https://github.com/PoojaVM/master-ontology-app
 ### Assumptions:
 1. Concepts
     - Concepts can have multiple parents and children.
-    - User can add any concept without any parent.
-    - User can add multiple parents to a concept.
-    - User can add multiple children to a concept.
+    - User can add any concept without any parent or child.
+    - User can add multiple parents and children to a concept.
+    - Parent-child relationship is strictly enforced. Parent cannot be added as both parent and child for same concept and vice-versa.
 2. Users
-    - Super Admin can add users and assign roles to them.
-    - Admin can add users and assign only Editor and Viewer roles.
+    - By default, users are added as Viewers on Signup.
+    - Super Admin can change roles (Except Super Admin) of any user.
+    - Admin can assign only Editor and Viewer roles.
     - Editor can add, edit and delete concepts.
     - Viewer can only view the concepts.
 
 ### UI Design:
-1. The UI is avaiable in both light and dark mode.
+1. The UI is available in both light and dark mode.
 2. Material-UI is used for designing the application.
+3. The UI is build with a Desktop client in mind. Mobile responsiveness is not explicitly handled but can be managed using Material-UI.
 
 ### Database Schema
 
@@ -87,10 +90,10 @@ This table stores the main clinical concepts.
 
 ```sql
 CREATE TABLE ontology_clinical_concepts (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    id BIGSERIAL PRIMARY KEY,
     display_name VARCHAR(255) NOT NULL,
     description TEXT,
-    alternate_names VARCHAR(255)
+    alternate_names VARCHAR(255)[]
 );
 ```
 ##### `ontology_clinical_relationships`
@@ -102,8 +105,8 @@ CREATE TABLE ontology_clinical_relationships (
     parent_id BIGINT,
     child_id BIGINT,
     PRIMARY KEY (parent_id, child_id),
-    FOREIGN KEY (parent_id) REFERENCES ontology_clinical_concepts(id),
-    FOREIGN KEY (child_id) REFERENCES ontology_clinical_concepts(id)
+    FOREIGN KEY (parent_id) REFERENCES ontology_clinical_concepts(id) ON DELETE CASCADE,
+    FOREIGN KEY (child_id) REFERENCES ontology_clinical_concepts(id) ON DELETE CASCADE
 );
 ```
 ### Technology Stack:
@@ -123,17 +126,7 @@ CREATE TABLE ontology_clinical_relationships (
 3. Run `npm start` to start the application.
 4. Use same credentials as mentioned above to login.
 
-## TASK 2: Questions for Ontology Team
-1. How many concepts can a concept have as parents and children?
-2. Is there parent-child relationship between concepts strictly enforced?
-3. How often do the permissions change for the users?
-4. What are good performance metrics for the application?
-5. What are the most common operations performed on the concepts?
-6. How many users are expected to use the application?
-7. What additional features are expected in the application?
-8. What is the user feedback on the current application?
-
-### TASK 3: Target Application Architecture:
+## TASK 2: Target Application Architecture:
 - This is the Master Ontolgy Application Architecture: ![Master Ontology App Architecture)](./docs/architecture-diagram.png)
 - Links:
     - Image is stored in the GIT repo at [this](https://github.com/PoojaVM/master-ontology-app/blob/master/docs/architecture-diagram.png) location.
@@ -146,10 +139,13 @@ CREATE TABLE ontology_clinical_relationships (
     - The application can be accessed using the API Gateway.
     - Deployment can be automated using AWS CodePipeline.
 - CSV Data Transformation Proposal:
-    - The CSV data transformation can be done using AWS Glue.
-    - The data can be transformed into a format that can be stored in the RDS database.
-    - The transformed data can be stored in the RDS database using AWS Lambda functions.
-    - The data can be accessed by the application using the API Gateway.
+    - Backend:
+        - Utilize AWS Glue to transform the CSV data into a format suitable for storage in the RDS database.
+        - Employ AWS Lambda functions to handle the storage of transformed data into the RDS database.
+    - Frontend:
+        - Allow users to upload the CSV file directly through the application interface.
+        - The application will use AWS Lambda to connect to the AWS Glue setup described in the backend proposal, completing the data transformation process.
+        - Users can be notified on completion of the data transformation process using AWS SNS.
 - Security Proposal:
     - User Authentication:
         - Use AWS Cognito for user authentication.
@@ -170,6 +166,17 @@ CREATE TABLE ontology_clinical_relationships (
         - Use AWS WAF for protecting the application from common web exploits.
     - DDoS Protection:
         - Use AWS Shield for protecting the application from DDoS attacks ensuring high availability.
+
+## TASK 3: Questions for Ontology Team
+1. How many concepts can a concept have as parents and children?
+2. To what level should the parent-child hierarchy be strictly enforced?
+3. How often do the permissions change for the users?
+4. What are good performance metrics for the application?
+5. What are the most common operations performed on the concepts?
+6. How many users are expected to use the application?
+7. What additional features are expected in the application?
+8. What is the user feedback on the current application?
+9. Are they looking for accessibility features in the application?
 
 
 ### Thank you for the opportunity!

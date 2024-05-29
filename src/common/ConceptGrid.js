@@ -31,26 +31,26 @@ const sortableHeaderCells = [
     label: "Concept ID",
     disablePadding: true,
     numeric: true,
-    width: 100,
+    width: "8%",
   },
   {
     id: "display_name",
     label: "Display Name",
     disablePadding: false,
     numeric: false,
-    width: 200,
+    width: "20%",
   },
 ];
 
 const unsortableHeaderCells = [
-  { id: "description", label: "Description", numeric: false, width: 300 },
-  { id: "parent_ids", label: "Parent IDs", numeric: true, width: 200 },
-  { id: "child_ids", label: "Child IDs", numeric: true, width: 200 },
+  { id: "description", label: "Description", numeric: false, width: "27%" },
+  { id: "parent_ids", label: "Parent IDs", numeric: true, width: "10%" },
+  { id: "child_ids", label: "Child IDs", numeric: true, width: "10%" },
   {
     id: "alternate_names",
     label: "Alternate Names",
     numeric: false,
-    width: 200,
+    width: "20%",
   },
 ];
 
@@ -59,14 +59,16 @@ const ConceptIdsWithTooltip = ({ concepts }) => {
     <Tooltip
       title={
         <div style={{ whiteSpace: "pre-line" }}>
-          {concepts
-            ?.map(({ id, display_name }) => `${display_name} (${id})`)
-            ?.join("\n")}
+          {concepts?.length
+            ? concepts
+                ?.map(({ id, display_name }) => `${display_name} (${id})`)
+                ?.join("\n")
+            : "Not Added"}
         </div>
       }
     >
       <span>
-        {concepts?.map(({ id }) => id)?.join(", ")}
+        {concepts?.length ? concepts?.map(({ id }) => id)?.join(", ") : "N/A"}
       </span>
     </Tooltip>
   );
@@ -267,8 +269,16 @@ const ConceptGrid = () => {
                     <TableCell align="right">
                       <ConceptIdsWithTooltip concepts={row.children} />
                     </TableCell>
-                    <TableCell align="left">
-                      {row?.alternate_names?.join(", ")}
+                    <TableCell
+                      align="left"
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: 100,
+                      }}
+                    >
+                      {row?.alternate_names?.join(", ") || "-"}
                     </TableCell>
                     {canEdit ? (
                       <TableCell align="center">

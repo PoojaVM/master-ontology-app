@@ -1,6 +1,5 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -60,6 +59,7 @@ function ConceptsAutoComplete({
       onInputChange={(_, newInputValue) => {
         setSearch(newInputValue);
       }}
+      onBlur={() => setConcepts([])}
       multiple
       options={concepts}
       getOptionLabel={(concept) => concept.display_name + ` (${concept.id})`}
@@ -238,7 +238,9 @@ export default function ConceptFormDialog({
           </Box>
         ) : null}
         <CustomTextField
-          InputProps={{ readOnly: !canEdit }}
+          InputProps={{ readOnly: !canEdit, helperText: "Required"}}
+          inputProps={{ maxLength: 64 }}
+          helperText={displayName.length + "/64 Characters"}
           required
           margin="dense"
           id="displayName"
@@ -257,6 +259,8 @@ export default function ConceptFormDialog({
         />
         <CustomTextField
           InputProps={{ readOnly: !canEdit }}
+          inputProps={{ maxLength: 255 }}
+          helperText={description.length + "/255 Characters"}
           required
           margin="dense"
           id="description"
@@ -287,7 +291,7 @@ export default function ConceptFormDialog({
           style={{ marginTop: "8px", marginBottom: "8px" }}
           getOptionDisabled={(option) =>
             concept?.id === option?.id ||
-            childs?.some((child) => child?.id === option?.id)
+            childs?.some((child) => child?.id === Number(option?.id))
           }
         />
         <ConceptsAutoComplete
@@ -295,7 +299,7 @@ export default function ConceptFormDialog({
           readOnly={!canEdit}
           getOptionDisabled={(option) =>
             concept?.id === option?.id ||
-            parents?.some((parent) => parent?.id === option?.id)
+            parents?.some((parent) => parent?.id === Number(option?.id))
           }
           value={childs}
           onChange={(_, newValue) => {
@@ -306,6 +310,8 @@ export default function ConceptFormDialog({
         />
         <CustomTextField
           InputProps={{ readOnly: !canEdit }}
+          inputProps={{ maxLength: 255 }}
+          helperText={alternateNames.length + "/255 Characters"}
           margin="dense"
           id="alternateNames"
           name="alternateNames"

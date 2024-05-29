@@ -12,6 +12,7 @@ import Loading from "./Loading";
 import userAPIService from "../api/users";
 import { useAuth } from "../contexts/AuthContext";
 import { canManageUsers } from "../utils";
+import CustomSelect from "./CustomSelect";
 
 export default function ChangeRoleDialog({
   user,
@@ -89,7 +90,7 @@ export default function ChangeRoleDialog({
         </DialogContentText>
         <FormControl fullWidth>
           <InputLabel id="role-select-label">Select Role</InputLabel>
-          <Select
+          <CustomSelect
             labelId="role-select-label"
             id="role-select"
             value={role}
@@ -110,7 +111,7 @@ export default function ChangeRoleDialog({
                 {rolesMap[value]}
               </MenuItem>
             ))}
-          </Select>
+          </CustomSelect>
         </FormControl>
         <DialogContentText mt={2}>
           {role === ROLES.SUPER_ADMIN

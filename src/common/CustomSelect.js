@@ -1,6 +1,6 @@
-import { styled, TextField } from "@mui/material";
+import { styled, Select } from "@mui/material";
 
-const CustomTextField = styled((props) => <TextField {...props} />)(
+const CustomSelect = styled((props) => <Select {...props} />)(
   ({ theme }) => ({
     "& .MuiInputBase-root": {
       color: theme.palette.text.primary,
@@ -29,4 +29,4 @@ const CustomTextField = styled((props) => <TextField {...props} />)(
   })
 );
 
-export default CustomTextField;
+export default CustomSelect;
