@@ -1,5 +1,10 @@
 # Candidate name: Pooja Mule (poojamules95@gmail.com)
 
+## Table of Contents
+- [Task 1: Application for Master Ontology Concepts Maintenance](#task-1-application-for-master-ontology-concepts-maintenance)
+- [Task 2: Target Application Architecture](#task-2-target-application-architecture)
+- [Task 3: Meet with Ontology Team](#task-3-meet-with-ontology-team)
+
 ## TASK 1: Application for Master Ontology Concepts Maintenance
 ### Application URL
 https://master.d2aukg2a51vgnk.amplifyapp.com
@@ -66,9 +71,9 @@ https://github.com/PoojaVM/master-ontology-app
 ### Assumptions:
 1. Concepts
     - Concepts can have multiple parents and children.
-    - User can add any concept without any parent or child.
-    - User can add multiple parents and children to a concept.
-    - Parent-child relationship is strictly enforced. Parent cannot be added as both parent and child for same concept and vice-versa.
+    - Users can add any concept without any parent or child.
+    - Users can add multiple parents and children to a concept.
+    - Parent-child relationship is strictly enforced. A parent cannot be added as both parent and child for the same concept and vice-versa.
 2. Users
     - By default, users are added as Viewers on Signup.
     - Super Admin can change roles (Except Super Admin) of any user.
@@ -81,7 +86,7 @@ https://github.com/PoojaVM/master-ontology-app
 2. Material-UI is used for designing the application.
 3. Loaders are displayed for API calls.
 4. Acknowledgement messages are displayed for successful operations.
-5. The UI is build with a Desktop client in mind. Mobile responsiveness is not explicitly handled but can be managed using Material-UI.
+5. The UI is built with a Desktop client in mind. Mobile responsiveness is not explicitly handled but can be managed using Material-UI.
 
 ### Database Schema
 
@@ -129,8 +134,8 @@ CREATE TABLE ontology_clinical_relationships (
 4. Run `npm start` to start the application.
 5. Use same credentials as mentioned above to login.
 
-## TASK 2: Target Application Architecture:
-- This is the Master Ontolgy Application Architecture: ![Master Ontology App Architecture)](./docs/architecture-diagram.png)
+## TASK 2: Target Application Architecture
+- This is the Master Ontology Application Architecture: ![Master Ontology App Architecture)](./docs/architecture-diagram.png)
 - Links:
     - Image is stored in the GIT repo at [this](https://github.com/PoojaVM/master-ontology-app/blob/master/docs/architecture-diagram.png) location.
     - Diagram is drawn using LucidChart and can be viewed using this [link](https://lucid.app/lucidchart/430c5fc9-247f-4dc9-b240-0740f2c93f75/edit?viewport_loc=-479%2C24%2C2219%2C1095%2C0_0&invitationId=inv_8e39fa37-768e-4407-855e-7f6b36ecdb8a).
@@ -175,7 +180,7 @@ CREATE TABLE ontology_clinical_relationships (
     1. Using AWS Glue for CSV data transformation.
     2. Adding frontend functionality for CSV data upload.
 - Concerns:
-    1. As an app with potentially sensitive clinical data, how is the compliance ensured?
+    1. As an app with potentially sensitive clinical data, how should the app compliance be ensured?
 - Questions:
     1. What is the performance expectation for the application?
     2. How many concepts can a concept have as parents and children?
